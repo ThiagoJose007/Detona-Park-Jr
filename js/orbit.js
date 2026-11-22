@@ -14,6 +14,8 @@
    mouseFrames (quanto o mouse gira, padrão 18),
    span (largura do trecho em "ilhas", padrão 1 = de um
    meio-caminho ao seguinte).
+   Se o estúdio escuro comer paredes escuras do diorama, aperte
+   a máscara na própria ilha: mask: { radiusX, radiusY, core, key0, key1 }.
    ========================================================= */
 window.ORBIT = (() => {
   const DEFAULTS = {
