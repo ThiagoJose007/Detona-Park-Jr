@@ -27,6 +27,8 @@ window.PARK = (() => {
       id: "sugar", name: "Sugar Rush", hook: "Corrida doce", color: "#ff4fb0",
       intensity: 4, forWho: "Família e amigos",
       text: "Escolha a fantasia, personalize seu kart e dispute largadas de 8 pilotos numa pista de doces. Mas atenção: algo escapou do jogo…",
+      // Volta 360° pré-renderizada. Outras ilhas: mesma pasta de quadros + este bloco.
+      orbit: { folder: "assets/islands/sugar-rush", frames: 120, hero: 0 },
     },
     {
       id: "cola", name: "Montanha-Russa Diet Cola", hook: "O grande final", color: "#ffc93c",
