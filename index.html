@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="pt-BR" class="is-loading">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Detona Park</title>
+  <meta name="description" content="Detona Park — atravesse a tela do fliperama e passe o dia dentro dos jogos, com a família e os amigos." />
+  <meta name="theme-color" content="#07060b" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=Pixelify+Sans:wght@600;700&family=Silkscreen&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css?v=2" />
+</head>
+<body>
+
+  <!-- ============ CAMADAS FIXAS ============ -->
+
+  <!-- Abertura curta: só a marca (sem contador) -->
+  <div class="intro" aria-hidden="true">
+    <p class="intro-logo"><span class="logo-mark"></span>Detona Park</p>
+    <span class="intro-line"><i></i></span>
+  </div>
+
+  <canvas id="scene" aria-hidden="true"></canvas>
+  <div class="flash" aria-hidden="true"></div>
+
+  <!-- Barra superior mínima -->
+  <header class="nav" id="nav">
+    <a href="#inicio" class="nav-logo" data-goto="inicio" aria-label="Detona Park — início">
+      <span class="logo-mark"></span><span>Detona Park</span>
+    </a>
+    <div class="nav-right">
+      <button class="tokens" id="tokens" type="button" aria-label="Suas fichas: 0">
+        <span class="tokens-coin" aria-hidden="true"></span><span id="tokenN">0</span>
+      </button>
+      <a href="#visite" class="btn btn-sm btn-primary" data-goto="visite">Ingressos</a>
+    </div>
+  </header>
+
+  <!-- Aviso de fichas (pode ser fechado ou silenciado) -->
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden>
+    <span class="toast-coin" aria-hidden="true"></span>
+    <div class="toast-body">
+      <p class="toast-title" id="toastTitle">+1 ficha</p>
+      <p class="toast-msg" id="toastMsg"></p>
+      <button class="toast-mute" id="toastMute" type="button">Não mostrar mais avisos</button>
+    </div>
+    <button class="toast-close" id="toastClose" type="button" aria-label="Fechar aviso"></button>
+  </div>
+
+  <!-- Menu: círculo com texto na borda + dock -->
+  <div class="menu" id="menu">
+    <div class="menu-backdrop"></div>
+    <div class="dock" role="dialog" aria-label="Menu">
+      <span class="dock-bg"></span>
+      <ul class="dock-list" id="dockList"></ul>
+    </div>
+    <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="dockList" aria-label="Abrir menu">
+      <svg class="menu-ring" viewBox="0 0 120 120" aria-hidden="true">
+        <path id="ringPath" fill="none" d="M 60,60 m -50,0 a 50,50 0 1,1 100,0 a 50,50 0 1,1 -100,0" />
+        <text class="menu-ring-text"><textPath href="#ringPath" textLength="312">MENU • MENU • MENU • MENU •</textPath></text>
+      </svg>
+      <span class="menu-disc">
+        <span class="menu-bar menu-bar-top"></span>
+        <span class="menu-bar menu-bar-bottom"></span>
+      </span>
+    </button>
+  </div>
+
+  <!-- ============ CONTEÚDO ROLÁVEL ============ -->
+  <div id="smooth-wrapper">
+    <div id="smooth-content">
+      <main>
+
+        <!-- 01 · HERO — o fliperama 3D acompanha o mouse -->
+        <section class="hero" id="inicio">
+          <div class="hero-copy container">
+            <p class="eyebrow">Parque temático de fliperama</p>
+            <h1 class="hero-title"><span class="line">Entre</span> <span class="line">no jogo.</span></h1>
+            <p class="hero-sub">Atravesse a tela do fliperama e passe o dia dentro dos jogos — com a família, os amigos e muita aventura.</p>
+            <div class="hero-actions">
+              <a href="#visite" class="btn btn-primary magnetic" data-goto="visite">Garantir ingresso</a>
+              <a href="#experiencia" class="btn btn-ghost" data-goto="experiencia">Como funciona</a>
+            </div>
+          </div>
+          <p class="hero-hint"><span class="hint-dot"></span><span class="hint-desk">Mexa o mouse e role para entrar</span><span class="hint-touch">Role para entrar</span></p>
+        </section>
+
+        <!-- 02 · A EXPERIÊNCIA -->
+        <section class="exp" id="experiencia">
+          <div class="exp-grid container">
+            <div class="exp-col">
+              <p class="eyebrow">A experiência</p>
+              <p class="statement" id="statement">Aqui você não fica olhando. <em>Você joga.</em> Cada ilha é um jogo diferente — e você é o personagem principal.</p>
+              <ul class="pillars" id="pillars"></ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- 03 · TRAVESSIA — a câmera entra pela tela do fliperama -->
+        <section class="tunnel" id="entrar">
+          <div class="tunnel-inner">
+            <div class="tunnel-text t1">
+              <p class="eyebrow">Pronto?</p>
+              <p class="tunnel-title">Aperte start.</p>
+            </div>
+            <div class="tunnel-text t2">
+              <p class="tunnel-title small">Você atravessa os fios que ligam os jogos…</p>
+            </div>
+            <div class="tunnel-text t3">
+              <p class="tunnel-title small">…e chega do outro lado da tela.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 04 · ILHAS — parque 3D; a câmera viaja de ilha em ilha -->
+        <section class="islands" id="ilhas">
+          <div class="islands-pin">
+            <div class="isl-panel container">
+              <p class="eyebrow">As ilhas <span class="isl-count"><span id="islNow">01</span> / <span id="islTotal">06</span></span></p>
+              <div class="isl-body" id="islBody">
+                <p class="isl-hook" id="islHook"></p>
+                <h2 class="isl-name" id="islName"></h2>
+                <p class="isl-text" id="islText"></p>
+                <dl class="isl-meta">
+                  <div><dt>Intensidade</dt><dd><span class="meter" id="islMeter"></span></dd></div>
+                  <div><dt>Ideal para</dt><dd id="islFor"></dd></div>
+                </dl>
+              </div>
+              <ol class="isl-dots" id="islDots" aria-label="Escolha uma ilha"></ol>
+            </div>
+            <p class="isl-hint"><span class="hint-desk">Mexa o mouse para olhar ao redor</span><span class="hint-touch">Role para visitar cada ilha</span></p>
+          </div>
+        </section>
+
+        <!-- 05 · SEU DIA — passos + relógio que acompanha o mouse -->
+        <section class="day" id="seu-dia">
+          <div class="day-pin">
+            <div class="day-grid container">
+              <div class="day-copy">
+                <p class="eyebrow">Seu dia no parque</p>
+                <h2 class="h2">Mais tempo jogando. <span class="muted">Menos tempo na fila.</span></h2>
+                <ol class="day-steps" id="daySteps"></ol>
+              </div>
+              <div class="watch-wrap">
+                <div class="watch" id="watch">
+                  <span class="watch-strap top"></span>
+                  <div class="watch-body">
+                    <span class="watch-crown"></span>
+                    <div class="watch-screen" id="watchScreen"></div>
+                  </div>
+                  <span class="watch-strap bottom"></span>
+                </div>
+                <div class="day-progress" id="dayProgress" aria-hidden="true"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 06 · ERUPÇÃO — o vulcão 3D explode -->
+        <section class="erupt" id="erupcao">
+          <div class="erupt-inner container">
+            <p class="eyebrow">Todo dia, às 17h</p>
+            <h2 class="h2">O parque inteiro para. <span class="muted">E o vulcão explode.</span></h2>
+            <p class="lead">O vulcão de refrigerante entra em erupção à vista de todos: é o sinal de que a invasão foi contida. Um final que todo mundo vive junto.</p>
+            <div class="erupt-row">
+              <button class="btn btn-primary magnetic" id="eruptBtn" type="button">Detonar agora</button>
+              <p class="countdown"><span>Próxima erupção em</span><b id="eruptClock">00:00:00</b></p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 07 · VISITE — informações práticas + perguntas + ingresso -->
+        <section class="visit" id="visite">
+          <div class="container">
+            <p class="eyebrow">Planeje sua visita</p>
+            <h2 class="h2 visit-title">Pronto para entrar no jogo?</h2>
+
+            <div class="info-grid">
+              <article class="info">
+                <span class="info-icon" data-icon="pin"></span>
+                <p class="info-k">Onde</p>
+                <p class="info-v">Maceió · Alagoas</p>
+                <p class="info-t">Endereço completo em breve.</p>
+              </article>
+              <article class="info">
+                <span class="info-icon" data-icon="volcano"></span>
+                <p class="info-k">Erupção diária</p>
+                <p class="info-v">17h</p>
+                <p class="info-t">Chegue cedo para curtir todas as ilhas antes do grande final.</p>
+              </article>
+              <article class="info">
+                <span class="info-icon" data-icon="family"></span>
+                <p class="info-k">Para quem</p>
+                <p class="info-v">Todo mundo</p>
+                <p class="info-t">Famílias com crianças, grupos de amigos e quem cresceu nos fliperamas.</p>
+              </article>
+            </div>
+
+            <div class="faq" id="faq"></div>
+
+            <div class="cta">
+              <p class="cta-title">Sua aventura começa aqui.</p>
+              <button class="btn btn-primary btn-lg magnetic" id="buyBtn" type="button">Quero meu ingresso</button>
+              <p class="cta-note">Protótipo acadêmico — venda de ingressos em breve.</p>
+            </div>
+          </div>
+        </section>
+
+        <footer class="footer container">
+          <a href="#inicio" class="nav-logo" data-goto="inicio"><span class="logo-mark"></span><span>Detona Park</span></a>
+          <p class="footer-credits">Projeto acadêmico · Design de Serviços · 2026</p>
+          <p class="footer-team" id="team"></p>
+          <a href="#inicio" class="footer-top" data-goto="inicio">Voltar ao topo <span data-icon="arrowUp"></span></a>
+        </footer>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- GSAP 3.13 -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollSmoother.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrambleTextPlugin.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/CustomEase.min.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/scene.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
