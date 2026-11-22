@@ -12,6 +12,21 @@ window.PARK = (() => {
       id: "lobby", name: "Lobby Fliperama", hook: "Comece jogando", color: "#49d8ff",
       intensity: 1, forWho: "Todas as idades",
       text: "Um salão aberto cheio de máquinas clássicas. Jogue à vontade enquanto o parque prepara a sua entrada.",
+      // Fundo chapado 54,61,74. A elipse é larga para o túnel de neon sair do quadro sem corte.
+      orbit: {
+        folder: "assets/islands/lobby",
+        frames: 120,
+        hero: 0,
+        mask: {
+          centerY: 0.5,
+          radiusX: 0.58,
+          radiusY: 0.58,
+          key0: 0.07,
+          key1: 0.15,
+          core: 0.62,
+          keyColor: [54 / 255, 61 / 255, 74 / 255],
+        },
+      },
     },
     {
       id: "felix", name: "Conserta ou Detona", hook: "A escolha é sua", color: "#ff8a1f",
