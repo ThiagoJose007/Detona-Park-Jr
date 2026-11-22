@@ -3,6 +3,7 @@
    Mundo 0: o fliperama (acompanha o mouse) e o túnel de fios.
    Mundo 1: o parque — ilhas flutuantes ligadas por fios de
    energia; a câmera viaja de ilha em ilha e o mouse olha ao redor.
+   Ilhas com `orbit` em data.js trocam o modelo por uma volta 360°.
    O scroll (main.js) só anima os objetos `S` (mundo 0) e `P`
    (parque); esta cena lê os dois a cada frame.
    ========================================================= */
@@ -418,6 +419,7 @@ window.SCENE = (() => {
     };
 
     // ---- ilhas ----
+    const orbits = [];
     const islands = ISL.map((d, i) => {
       const a = angleOf(i);
       const g = new THREE.Group();
@@ -425,21 +427,32 @@ window.SCENE = (() => {
       g.position.set(Math.cos(a) * R, baseY, Math.sin(a) * R);
       g.rotation.y = Math.PI / 2 - a;
       const col = new THREE.Color(d.color);
+      const base = new THREE.Group();
       const slab = new THREE.Mesh(new THREE.CylinderGeometry(2.3, 2.1, 0.4, 40), std(0x1a1524, { flatShading: false }));
       slab.position.y = -0.2;
-      g.add(slab);
+      base.add(slab);
       const cap = new THREE.Mesh(new THREE.CircleGeometry(2.25, 40), std(col.clone().lerp(new THREE.Color(0x0e0b14), 0.82), { flatShading: false }));
       cap.rotation.x = -Math.PI / 2;
       cap.position.y = 0.002;
-      g.add(cap);
+      base.add(cap);
       const rock = new THREE.Mesh(new THREE.ConeGeometry(2.05, 2.4, 9), std(0x120e19));
       rock.rotation.x = Math.PI;
       rock.position.y = -1.6;
-      g.add(rock);
+      base.add(rock);
       const rim = new THREE.Mesh(new THREE.TorusGeometry(2.3, 0.022, 6, 72), neon(d.color));
       rim.rotation.x = Math.PI / 2;
-      g.add(rim);
-      MODELS[d.id]?.(g, col);
+      base.add(rim);
+      g.add(base);
+      const model = new THREE.Group();
+      g.add(model);
+      MODELS[d.id]?.(model, col);
+      if (d.orbit && window.ORBIT) {
+        try {
+          orbits.push(window.ORBIT.mount(THREE, { parent: g, model, base, index: i, config: d.orbit }));
+        } catch (err) {
+          console.warn("Órbita indisponível:", d.id, err);
+        }
+      }
       park.add(g);
       return { g, baseY, a };
     });
@@ -646,11 +659,14 @@ window.SCENE = (() => {
       const i0 = Math.floor(f), i1 = Math.min(N - 1, i0 + 1), k = f - i0;
       const p0 = islands[i0].g.position, p1 = islands[i1].g.position;
       target.lerpVectors(p0, p1, k);
-      const a = angleOf(f) + pl.x * 0.5;
+      // Na ilha com órbita a câmera fica de frente; o giro fica nos quadros.
+      let damp = 0;
+      for (const o of orbits) damp = Math.max(damp, o.weight(P.island));
+      const a = angleOf(f) + pl.x * 0.5 * (1 - damp);
       const dist = 8.6 * P.zoom;
       camera.position.set(
         target.x + Math.cos(a) * dist,
-        target.y + 2.0 * P.zoom + 0.5 - pl.y * 1.1,
+        target.y + 2.0 * P.zoom + 0.5 - pl.y * 1.1 * (1 - damp),
         target.z + Math.sin(a) * dist
       );
       camera.lookAt(target.x, target.y + 0.85, target.z);
@@ -721,6 +737,7 @@ window.SCENE = (() => {
         pulseGeo.attributes.position.needsUpdate = true;
         updateErupt(dt);
         parkCamera();
+        for (const o of orbits) o.update(dt, { island: P.island, camera, active: true });
       }
       renderer.render(scene, camera);
     }

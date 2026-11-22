@@ -356,6 +356,8 @@
   const islDots = $$(".isl-dot");
   const islBody = $("#islBody");
   let islIdx = -1;
+  const hintDesk = $(".isl-hint .hint-desk");
+  const hintTouch = $(".isl-hint .hint-touch");
   function fillIsland(d) {
     islBody.style.setProperty("--c", d.color);
     $("#islHook").textContent = d.hook;
@@ -364,6 +366,8 @@
     $("#islFor").textContent = d.forWho;
     $("#islMeter").innerHTML = Array.from({ length: 5 }, (_, k) => `<i class="${k < d.intensity ? "on" : ""}"></i>`).join("");
     $("#islMeter").setAttribute("aria-label", `${d.intensity} de 5`);
+    if (hintDesk) hintDesk.textContent = d.orbit ? "Role para girar · mexa o mouse para olhar" : "Mexa o mouse para olhar ao redor";
+    if (hintTouch) hintTouch.textContent = d.orbit ? "Role para girar a ilha" : "Role para visitar cada ilha";
   }
   function setIsland(i, instant = false) {
     if (i === islIdx) return;
