@@ -17,6 +17,8 @@ window.PARK = (() => {
       id: "felix", name: "Conserta ou Detona", hook: "A escolha é sua", color: "#ff8a1f",
       intensity: 2, forWho: "Crianças e família",
       text: "Derrube blocos com as próprias mãos ou suba a parede de escalada do prédio para consertar tudo.",
+      // Prédio claro: a máscara padrão cobre a base redonda sem comer a fachada.
+      orbit: { folder: "assets/islands/conserta-felix", frames: 120, hero: 0 },
     },
     {
       id: "heros", name: "Hero's Duty", hook: "Missão de soldado", color: "#3dff8b",
