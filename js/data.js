@@ -43,11 +43,25 @@ window.PARK = (() => {
       id: "cola", name: "Montanha-Russa Diet Cola", hook: "O grande final", color: "#ffc93c",
       intensity: 5, forWho: "Os mais corajosos",
       text: "Um percurso escuro e molhado que termina dentro da erupção do vulcão de refrigerante. Game over no melhor sentido.",
+      // Chão espelhado e partículas: elipse mais alta, para a erupção e o reflexo sumirem na borda em vez de serem cortados.
+      orbit: {
+        folder: "assets/islands/diet-cola",
+        frames: 120,
+        hero: 0,
+        mask: { centerY: 0.56, radiusX: 0.44, radiusY: 0.6, key0: 0.04, key1: 0.105, core: 0.5 },
+      },
     },
     {
       id: "praca", name: "Praça Doce", hook: "Respira e comemora", color: "#ff2e3b",
       intensity: 1, forWho: "Todas as idades",
       text: "Monte seu carrinho de doces, personalize seu capacete e troque as fichas do dia por itens exclusivos.",
+      // O túnel de neon sai do quadro: a elipse é mais larga para o fio apagar na borda.
+      orbit: {
+        folder: "assets/islands/praca",
+        frames: 120,
+        hero: 0,
+        mask: { centerY: 0.52, radiusX: 0.58, radiusY: 0.56, key0: 0.05, key1: 0.12, core: 0.52 },
+      },
     },
   ];
 
