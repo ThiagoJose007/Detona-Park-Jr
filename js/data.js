@@ -22,6 +22,13 @@ window.PARK = (() => {
       id: "heros", name: "Hero's Duty", hook: "Missão de soldado", color: "#3dff8b",
       intensity: 4, forWho: "Quem ama adrenalina",
       text: "Pilote o simulador de voo e defenda o parque de uma invasão de insetos. Seu controle, sua missão.",
+      // Paredes escuras: a máscara é mais fechada que a da Sugar Rush para o estúdio não comer a sala.
+      orbit: {
+        folder: "assets/islands/heros-duty",
+        frames: 120,
+        hero: 0,
+        mask: { centerY: 0.515, radiusX: 0.34, radiusY: 0.46, key0: 0.06, key1: 0.13, core: 0.8 },
+      },
     },
     {
       id: "sugar", name: "Sugar Rush", hook: "Corrida doce", color: "#ff4fb0",
