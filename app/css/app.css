@@ -49,8 +49,13 @@ svg { display: block; }
    Moldura: no computador o app fica num aparelho ao lado do
    painel de apresentação; no celular ocupa a tela toda.
    ========================================================= */
-body { display: grid; grid-template-columns: minmax(300px, 440px) auto; justify-content: center; align-items: center; gap: clamp(32px, 6vw, 96px); min-height: 100vh; padding: 24px; }
-.deck { display: grid; gap: 16px; align-content: safe center; max-height: calc(100vh - 48px); overflow: auto; padding-right: 6px; }
+body { display: grid; grid-template-columns: minmax(300px, 440px) auto; justify-content: center; align-items: center; gap: clamp(32px, 6vw, 96px); height: 100vh; padding: 24px; overflow: hidden; }
+/* zoom do painel e do aparelho é calculado em app.js (fitDesktop) para caber em telas baixas */
+.deck { display: grid; gap: 16px; align-content: safe center; max-height: calc(100vh - 48px); overflow: auto; padding-right: 6px; scrollbar-width: thin; scrollbar-color: rgba(244, 236, 220, 0.15) transparent; }
+.deck::-webkit-scrollbar { width: 6px; }
+.deck::-webkit-scrollbar-thumb { background: rgba(244, 236, 220, 0.15); border-radius: 3px; }
+.app *::-webkit-scrollbar { display: none; }
+.app * { scrollbar-width: none; }
 .deck-logo { display: inline-flex; align-items: center; font-family: var(--font-pixel); font-weight: 700; font-size: 18px; }
 .deck-title { font-size: 34px; font-weight: 500; line-height: 1.05; letter-spacing: -0.035em; }
 .deck-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -68,7 +73,7 @@ body { display: grid; grid-template-columns: minmax(300px, 440px) auto; justify-
 .deck-clock span { font-size: 13px; color: var(--muted); }
 .deck-btns { display: flex; flex-wrap: wrap; gap: 6px; }
 
-.device { position: relative; height: min(844px, calc(100vh - 48px)); aspect-ratio: 390 / 844; border-radius: 54px; padding: 12px; background: #17121f; box-shadow: inset 0 0 0 2px #2c2238; }
+.device { position: relative; width: 414px; height: 868px; flex: none; border-radius: 54px; padding: 12px; background: #17121f; box-shadow: inset 0 0 0 2px #2c2238; }
 .device::before { content: ""; position: absolute; top: 22px; left: 50%; transform: translateX(-50%); width: 110px; height: 30px; border-radius: 20px; background: #000; z-index: 30; }
 .app { position: relative; height: 100%; border-radius: 42px; overflow: hidden; background: var(--bg); display: flex; flex-direction: column; isolation: isolate; }
 .statusbar { flex: none; height: 50px; display: flex; align-items: center; justify-content: space-between; padding: 10px 30px 0 34px; font-size: 14px; font-weight: 600; }
@@ -80,9 +85,9 @@ body { display: grid; grid-template-columns: minmax(300px, 440px) auto; justify-
 .sb-watch.on { background: var(--green); }
 
 @media (max-width: 860px) {
-  body { display: block; padding: 0; min-height: 0; height: 100%; }
+  body { display: block; padding: 0; min-height: 0; height: 100%; overflow: visible; }
   .deck { display: none; }
-  .device { height: 100%; width: 100%; aspect-ratio: auto; border-radius: 0; padding: 0; background: none; box-shadow: none; }
+  .device { height: 100%; width: 100%; zoom: 1 !important; border-radius: 0; padding: 0; background: none; box-shadow: none; }
   .device::before { display: none; }
   .app { border-radius: 0; height: 100vh; height: 100dvh; }
   .statusbar { height: env(safe-area-inset-top, 0); padding: 0; overflow: hidden; }

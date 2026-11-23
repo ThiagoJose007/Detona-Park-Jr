@@ -41,6 +41,7 @@
     smoothTouch: 0.1,
   });
   smoother.paused(true);
+  window.SITE = { smoother }; // usado pela compra (js/checkout.js) para travar o fundo
 
   const goTo = (id) => {
     const el = document.getElementById(id);
@@ -333,12 +334,12 @@
     const onActive = (trigger, fn) =>
       ScrollTrigger.create({ trigger, start: "top 55%", end: "bottom 45%", onToggle: (s) => s.isActive && fn() });
     onActive(".islands", () => {
-      parkState({ opacity: 1, ...ISL_VIEW });
+      parkState({ opacity: 1, solo: 0, ...ISL_VIEW });
       if (islST) islTo(islST.progress * (N - 1));
     });
     onActive(".day", () => parkState({ opacity: 0 }));
     onActive(".erupt", () => {
-      parkState({ opacity: 1, ...ERUPT_VIEW });
+      parkState({ opacity: 1, solo: 1, ...ERUPT_VIEW });
       islTo(4);
     });
     onActive(".visit", () => parkState({ opacity: 0 }));
@@ -496,9 +497,8 @@
   $("#faq").innerHTML = FAQ.map(
     (f) => `<details class="faq-item"><summary><span>${f.q}</span><span class="faq-plus">${icon("plus")}</span></summary><p>${f.a}</p></details>`
   ).join("");
-  $("#buyBtn").addEventListener("click", () =>
-    showToast("Ingressos em breve", "Este site é um protótipo acadêmico: a venda ainda não está aberta.", { force: true })
-  );
+  // Compra de ingressos: js/checkout.js
+  $("#buyBtn").addEventListener("click", () => window.CHECKOUT && window.CHECKOUT.open());
   $("#team").textContent = TEAM.join(" · ");
   gsap.from([".info", ".faq-item"], {
     y: 30, autoAlpha: 0, stagger: 0.06, duration: 1,
@@ -522,6 +522,8 @@
     document.documentElement.classList.remove("is-loading");
     smoother.paused(false);
     introHero();
+    // ?comprar abre a compra direto (atalho usado pelo painel do app)
+    if (new URLSearchParams(location.search).has("comprar") && window.CHECKOUT) setTimeout(() => window.CHECKOUT.open(), 600);
   }
 
   function introHero() {

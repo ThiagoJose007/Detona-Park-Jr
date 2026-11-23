@@ -22,7 +22,8 @@ window.SCENE = (() => {
     paused: true,    // liberado quando a abertura sai
   };
   // Mundo 1 — parque
-  const P = { opacity: 0, offX: 0, offY: 0, zoom: 1, island: 0 };
+  // solo: 0 = parque inteiro; 1 = só a ilha em foco (seção da erupção)
+  const P = { opacity: 0, offX: 0, offY: 0, zoom: 1, island: 0, solo: 0 };
 
   const intro = { s: 0, spin: Math.PI * 1.1 };
   const SCREENS = {
@@ -459,6 +460,7 @@ window.SCENE = (() => {
 
     // ---- fios de energia entre as ilhas + pulsos ----
     const curves = [];
+    const wires = [];
     for (let i = 0; i < N; i++) {
       const A = islands[i].g.position, B = islands[(i + 1) % N].g.position;
       const dir = B.clone().sub(A).normalize();
@@ -467,13 +469,16 @@ window.SCENE = (() => {
       const m = s.clone().lerp(e, 0.5).add(new THREE.Vector3(0, -1.3, 0));
       const curve = new THREE.QuadraticBezierCurve3(s, m, e);
       curves.push(curve);
-      park.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 40, 0.028, 5), neon(ISL[i].color, { transparent: true, opacity: 0.7 })));
+      const wire = new THREE.Mesh(new THREE.TubeGeometry(curve, 40, 0.028, 5), neon(ISL[i].color, { transparent: true, opacity: 0.7 }));
+      wires.push(wire);
+      park.add(wire);
     }
     const PULSES = 3;
     const pulsePos = new Float32Array(N * PULSES * 3);
     const pulseGeo = new THREE.BufferGeometry();
     pulseGeo.setAttribute("position", new THREE.BufferAttribute(pulsePos, 3));
-    park.add(new THREE.Points(pulseGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.16, toneMapped: false })));
+    const pulses = new THREE.Points(pulseGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.16, toneMapped: false }));
+    park.add(pulses);
     const tmpV = new THREE.Vector3();
 
     // ---- estrelas discretas ao fundo do parque ----
@@ -723,11 +728,18 @@ window.SCENE = (() => {
         park.visible = true;
         scene.fog.near = 15;
         scene.fog.far = 44;
+        // na erupção (solo), as outras ilhas e os fios somem: só o vulcão fica
+        const focusI = Math.round(P.island);
         islands.forEach((isl, i) => {
           isl.g.position.y = isl.baseY + Math.sin(t * 0.6 + i * 1.3) * 0.12;
           const d = Math.min(1, Math.abs(P.island - i));
-          isl.g.scale.setScalar(1 - d * 0.1);
+          const keep = i === focusI ? 1 : 1 - P.solo;
+          isl.g.scale.setScalar((1 - d * 0.1) * Math.max(0.001, keep));
+          isl.g.visible = keep > 0.02;
         });
+        const linesOn = P.solo < 0.5;
+        wires.forEach((w) => (w.visible = linesOn));
+        pulses.visible = linesOn;
         anims.forEach((fn) => fn(t, dt));
         for (let i = 0; i < N; i++)
           for (let k = 0; k < PULSES; k++) {

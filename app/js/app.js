@@ -7,7 +7,7 @@
 (() => {
   "use strict";
 
-  const { ISLANDS, FAQ, icon } = window.PARK;
+  const { ISLANDS, FAQ, ORDERS, icon } = window.PARK;
   const { ATTRACTIONS, SCHEDULE, TICKETS, REWARDS, island } = window.APP;
 
   /* ---------- utilidades ---------- */
@@ -879,28 +879,30 @@
   };
 
   SCREENS.buy = () => {
-    if (!D.buy) D.buy = { step: 0, date: todayISO(), qty: { dia: 1, meia: 0, turbo: 0 }, m: "pix" };
-    const B = D.buy;
+    if (!D.buy) D.buy = { step: 0, dates: [todayISO()], qty: { dia: 1, meia: 0, turbo: 0 }, m: "pix" };
+    const B = D.buy, nd = B.dates.length;
     const count = Object.values(B.qty).reduce((a, b) => a + b, 0);
-    const total = TICKETS.reduce((s, t) => s + t.price * B.qty[t.id], 0);
+    const total = TICKETS.reduce((s, t) => s + t.price * B.qty[t.id], 0) * nd;
+    const when = nd > 1 ? `${nd} dias` : dateLabel(B.dates[0]);
     const steps = `<div class="steps">${[0, 1, 2].map((i) => `<i class="${i <= B.step ? "on" : ""}"></i>`).join("")}</div>`;
     let b = `<div class="stack" style="min-height:100%">${steps}`;
     if (B.step === 0) {
       b += `<p class="eyebrow">Etapa 1 de 3</p><h2 class="h1">Quando você vem?</h2>
-        <div class="opts two">${[0, 1, 2, 3, 4, 5].map((o) => { const iso = dayISO(o); return `<button class="opt ${B.date === iso ? "on" : ""}" data-act="buyDate:${iso}"><span class="row-t">${dateLabel(iso)}</span><span class="row-s">${o === 0 ? "Erupção às 17h" : o === 5 ? "Últimas vagas" : "Vagas disponíveis"}</span></button>`; }).join("")}</div>
+        <p class="lead">Pode marcar mais de um dia. O grupo ganha um ingresso para cada dia.</p>
+        <div class="opts two">${[0, 1, 2, 3, 4, 5].map((o) => { const iso = dayISO(o); return `<button class="opt ${B.dates.includes(iso) ? "on" : ""}" data-act="buyDate:${iso}" aria-pressed="${B.dates.includes(iso)}"><span class="row-t">${dateLabel(iso)}</span><span class="row-s">${o === 0 ? "Erupção às 17h" : o === 5 ? "Últimas vagas" : "Vagas disponíveis"}</span></button>`; }).join("")}</div>
         <p class="note info">${icon("info")}Aberto das 9h às 18h. A erupção do vulcão acontece todo dia às 17h.</p>
-        <div class="footer-cta"><button class="btn btn-primary btn-block" data-act="buyStep:1">Continuar</button></div>`;
+        <div class="footer-cta"><button class="btn btn-primary btn-block" data-act="buyStep:1">Continuar · ${when}</button></div>`;
     } else if (B.step === 1) {
-      b += `<p class="eyebrow">Etapa 2 de 3 · ${dateLabel(B.date)}</p><h2 class="h1">Escolha os ingressos</h2>
+      b += `<p class="eyebrow">Etapa 2 de 3 · ${when}</p><h2 class="h1">Escolha os ingressos</h2>
         <div class="list">${TICKETS.map((t) => `<div class="row" style="align-items:flex-start"><span class="row-main"><span class="row-t">${esc(t.name)} ${t.tag ? `<span class="tag gold">${t.tag}</span>` : ""}</span><span class="row-s">${esc(t.desc)}</span><span class="row-t" style="margin-top:4px">${brl(t.price)}</span></span>
           <span class="qty"><button data-act="qty:${t.id}:-1" aria-label="Menos">${icon("minus")}</button><b>${B.qty[t.id]}</b><button data-act="qty:${t.id}:1" aria-label="Mais">${icon("plus")}</button></span></div>`).join("")}</div>
         <p class="note info">${icon("watch")}Cada ingresso inclui um relógio do parque, retirado no totem da entrada.</p>
-        <div class="footer-cta"><div class="sum" style="margin-bottom:10px"><p class="tot"><span>${count} ${count === 1 ? "ingresso" : "ingressos"}</span><span>${brl(total)}</span></p></div>
+        <div class="footer-cta"><div class="sum" style="margin-bottom:10px"><p class="tot"><span>${count * nd} ${count * nd === 1 ? "ingresso" : "ingressos"}${nd > 1 ? ` · ${nd} dias` : ""}</span><span>${brl(total)}</span></p></div>
           <div class="btn-row"><button class="btn btn-ghost" data-act="buyStep:0">Voltar</button><button class="btn btn-primary" data-act="buyStep:2" ${count ? "" : "disabled"}>Continuar</button></div></div>`;
     } else {
       const M = [{ id: "pix", t: "Pix", s: "Aprovação na hora" }, { id: "card", t: "Cartão salvo", s: "Crédito •••• 4242 · até 6x" }, { id: "wallet", t: "Saldo da carteira", s: `Disponível ${brl(S.wallet.balance)}`, off: S.wallet.balance < total }];
       b += `<p class="eyebrow">Etapa 3 de 3</p><h2 class="h1">Pagamento</h2>
-        <div class="sum">${TICKETS.filter((t) => B.qty[t.id]).map((t) => `<p><span>${B.qty[t.id]}× ${esc(t.name)}</span><span>${brl(t.price * B.qty[t.id])}</span></p>`).join("")}<p><span>Data</span><span>${dateLabel(B.date)}</span></p><p class="tot"><span>Total</span><span>${brl(total)}</span></p></div>
+        <div class="sum">${TICKETS.filter((t) => B.qty[t.id]).map((t) => `<p><span>${B.qty[t.id] * nd}× ${esc(t.name)}</span><span>${brl(t.price * B.qty[t.id] * nd)}</span></p>`).join("")}<p><span>${nd > 1 ? "Dias" : "Data"}</span><span>${B.dates.map(dateLabel).join(", ")}</span></p><p class="tot"><span>Total</span><span>${brl(total)}</span></p></div>
         <div class="opts">${M.map((m) => `<button class="opt ${B.m === m.id ? "on" : ""}" data-act="buyM:${m.id}" ${m.off ? "disabled style='opacity:.4'" : ""}>${ico(m.id === "pix" ? "qr" : "wallet")}<span class="row-main"><span class="row-t">${m.t}</span><span class="row-s">${m.s}</span></span><span class="radio"></span></button>`).join("")}</div>
         <p class="small faint">Protótipo: nenhum pagamento real é feito.</p>
         <div class="footer-cta btn-row"><button class="btn btn-ghost" data-act="buyStep:1">Voltar</button><button class="btn btn-primary" data-act="buyPay">Pagar ${brl(total)}</button></div>`;
@@ -1099,6 +1101,49 @@
     rail.scrollTo({ left: i * tixStep(rail), behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
   }
 
+  /* ---------- pedido comprado no site → app ---------- */
+  function importOrder(o, fromLink = false) {
+    if (S.tickets.some((t) => t.order === o.code)) {
+      closeSheet(); stack = [{ name: "home", p: {} }]; render("tab");
+      return toast("Esse pedido já está no app", `${o.code} · veja em Meus ingressos.`);
+    }
+    if (!S.onboarded) {
+      // quem chega pelo link do site entra direto, sem cadastro
+      S.onboarded = true;
+      S.user = { name: o.buyer.name, email: o.buyer.email || "" };
+      S.group = [];
+      S.wallet = { balance: 0, tokens: 3, history: [{ t: "Bônus de boas-vindas", tok: 3, at: S.clock }] };
+      S.earned = 3;
+    }
+    o.items.forEach((it, i) => {
+      S.tickets.push({ id: uid() + uid(), code: it.code || `${o.code}-${i + 1}`, order: o.code, type: it.type, holder: it.holder, date: it.date || o.date, used: false });
+      const name = String(it.holder || "").trim(), key = first(name).toLowerCase();
+      if (!name || S.group.some((g) => first(g.name).toLowerCase() === key)) return;
+      const me = !S.group.some((g) => g.me) && key === first(S.user.name).toLowerCase();
+      const h = +it.h || 170;
+      S.group.push({ id: me ? "me" : uid(), name: first(name), h, me, kid: h < 140 });
+    });
+    if (!S.group.some((g) => g.me)) S.group.unshift({ id: "me", name: first(S.user.name), h: 170, me: true });
+    save(); closeSheet(); D.ob = 0;
+    stack = [{ name: "home", p: {} }]; render("tab");
+    const n = o.items.length, ds = o.dates || [o.date], today = ds.includes(todayISO());
+    const when = ds.length > 1 ? `${ds.length} dias (${ds.map((d) => dateLabel(d).toLowerCase()).join(", ")})` : dateLabel(ds[0]).toLowerCase();
+    notify({ cat: "fila", ico: "ticket", c: "var(--green)", go: ["tickets"], title: "Ingressos do site no app", body: `Pedido ${o.code}: ${n} ${n > 1 ? "ingressos" : "ingresso"} para ${when}.` });
+    successSheet(fromLink ? `Bem-vindo, ${esc(first(S.user.name))}!` : "Pedido importado!",
+      `${n} ${n > 1 ? "ingressos" : "ingresso"} do pedido ${o.code} para ${when}. O grupo e as alturas já foram cadastrados.`,
+      `<button class="btn btn-primary btn-block" ${today ? 'data-act="openQR"' : 'data-go="tickets"'}>${today ? "Ver meus ingressos" : "Ver em Meus ingressos"}</button>
+       <button class="btn btn-ghost btn-block" data-go="watch">Parear o relógio</button>`);
+  }
+  function importFromURL() {
+    const q = new URLSearchParams(location.search);
+    const code = q.get("pedido");
+    if (!code) return;
+    const o = ORDERS.find(code) || (q.get("p") && ORDERS.decode(q.get("p")));
+    history.replaceState(null, "", location.pathname);
+    if (o && o.items && o.items.length) importOrder(o, true);
+    else toast("Pedido não encontrado", "Digite o código em Importar do site.");
+  }
+
   function needTicket() {
     sheet(`${sheetHead("Falta o ingresso")}<p class="lead" style="margin-bottom:16px">Para entrar na fila virtual ou reservar, você precisa de um ingresso para hoje.</p>
       <div class="stack"><button class="btn btn-primary btn-block" data-go="buy">Comprar ingresso</button><button class="btn btn-ghost btn-block" data-act="importTicket">Já comprei pelo site</button></div>`);
@@ -1168,36 +1213,62 @@
     },
 
     /* ingressos */
-    importTicket: () => sheet(`${sheetHead("Importar ingresso do site")}
-      <p class="lead" style="margin-bottom:14px">Digite o código que chegou no seu e-mail depois da compra no site.</p>
-      <div class="field"><label for="impCode">Código do pedido</label><input class="input" id="impCode" placeholder="DP-4F27" autocapitalize="characters" /></div>
-      <p class="small faint" style="margin:8px 0 16px">No protótipo, qualquer código funciona.</p>
-      <button class="btn btn-primary btn-block" data-act="importGo">Importar</button>`),
-    importGo: () => {
-      const code = ($("#impCode").value.trim() || "DP-" + uid()).toUpperCase();
-      const t = mkTicket("dia", S.user.name); t.code = code.startsWith("DP-") ? code.slice(0, 9) : "DP-" + code.slice(0, 6);
-      S.tickets.push(t); save(); closeSheet(); refresh();
-      toast("Ingresso importado", `Dia no parque para hoje · ${t.code}`);
+    importTicket: () => {
+      const last = ORDERS.all()[0];
+      sheet(`${sheetHead("Importar ingresso do site")}
+      <p class="lead" style="margin-bottom:14px">Digite o código do pedido que aparece na confirmação do site e no seu e-mail.</p>
+      <div class="field"><label for="impCode">Código do pedido</label><input class="input" id="impCode" placeholder="DP-7K3Q" autocapitalize="characters" value="${last && !S.tickets.some((t) => t.order === last.code) ? last.code : ""}" /></div>
+      <p class="small" id="impErr" style="margin:8px 0 0;color:var(--red-hi)" hidden></p>
+      <p class="small faint" style="margin:8px 0 16px">${last ? "Encontramos uma compra recente deste aparelho." : "Ainda não comprou? Faça a compra no site e volte aqui."}</p>
+      <div class="stack"><button class="btn btn-primary btn-block" data-act="importGo">Importar</button>
+      <a class="btn btn-ghost btn-block" href="../?comprar" target="_blank" rel="noopener">${icon("globe")}Comprar pelo site</a>
+      <button class="btn btn-ghost btn-block" data-act="importDemo">Usar um ingresso de exemplo</button></div>`);
     },
-    buyDate: (iso) => { D.buy.date = iso; refresh(); },
+    importGo: () => {
+      const code = $("#impCode").value.trim().toUpperCase();
+      const o = code && ORDERS.find(code);
+      if (!o) {
+        const err = $("#impErr");
+        err.textContent = code ? `Não achamos o pedido ${code} neste aparelho. Abra o link ou o QR da confirmação do site.` : "Digite o código do pedido.";
+        err.hidden = false; $("#impCode").style.borderColor = "var(--red-hi)"; return;
+      }
+      importOrder(o);
+    },
+    importDemo: () => {
+      const t = mkTicket("dia", S.user.name);
+      S.tickets.push(t); save(); closeSheet(); refresh();
+      toast("Ingresso de exemplo", `Dia no parque para hoje · ${t.code}`);
+    },
+    buyDate: (iso) => {
+      const B = D.buy, has = B.dates.includes(iso);
+      if (has && B.dates.length === 1) return toast("Escolha pelo menos um dia", "Toque em outro dia para trocar.");
+      B.dates = has ? B.dates.filter((d) => d !== iso) : [...B.dates, iso].sort();
+      refresh();
+    },
     buyStep: (n) => { D.buy.step = +n; render(+n > 0 ? "fwd" : "back"); },
     qty: (arg) => { const [id, d] = arg.split(":"); D.buy.qty[id] = Math.max(0, Math.min(8, D.buy.qty[id] + +d)); refresh(); },
     buyM: (m) => { D.buy.m = m; refresh(); },
     buyPay: () => {
       const B = D.buy;
-      const total = TICKETS.reduce((s, t) => s + t.price * B.qty[t.id], 0);
+      const total = TICKETS.reduce((s, t) => s + t.price * B.qty[t.id], 0) * B.dates.length;
       sheet(`<div style="display:grid;place-items:center;gap:14px;padding:30px 0"><span class="spinner"></span><p class="lead">Confirmando pagamento…</p></div>`);
       setTimeout(() => {
         const names = S.group.map((g) => g.name);
-        let k = 0;
-        TICKETS.forEach((t) => { for (let i = 0; i < B.qty[t.id]; i++) S.tickets.push(mkTicket(t.id, names[k++] || S.user.name, B.date)); });
+        const code = "DP-" + uid();
+        let n0 = 0;
+        B.dates.forEach((date) => {
+          let k = 0;
+          TICKETS.forEach((t) => { for (let i = 0; i < B.qty[t.id]; i++) { const tk = mkTicket(t.id, names[k++] || S.user.name, date); tk.order = code; tk.code = `${code}-${++n0}`; S.tickets.push(tk); } });
+        });
+        ORDERS.add({ code, date: B.dates[0], dates: [...B.dates], via: "app", at: new Date().toISOString(), buyer: { name: S.user.name, email: S.user.email || "" }, items: S.tickets.filter((t) => t.order === code).map((t) => ({ type: t.type, holder: t.holder, code: t.code, date: t.date })), total, method: B.m });
         if (B.m === "wallet") { S.wallet.balance -= total; S.wallet.history.unshift({ t: "Ingressos Detona Park", v: -total, at: S.clock }); }
-        const n = Object.values(B.qty).reduce((a, b) => a + b, 0);
-        const isToday = B.date === todayISO();
+        const n = n0;
+        const isToday = B.dates.includes(todayISO());
+        const when = B.dates.length > 1 ? `${B.dates.length} dias (${B.dates.map((d) => dateLabel(d).toLowerCase()).join(", ")})` : dateLabel(B.dates[0]).toLowerCase();
         D.buy = null; save();
         stack = [{ name: "home", p: {} }]; render("tab");
-        notify({ cat: "fila", ico: "ticket", c: "var(--green)", go: ["tickets"], title: "Ingressos confirmados", body: `${n} ${n > 1 ? "ingressos" : "ingresso"} para ${dateLabel(B.date).toLowerCase()}. Retire o relógio no totem da entrada.` });
-        successSheet("Compra confirmada!", `${n} ${n > 1 ? "ingressos" : "ingresso"} · ${brl(total)}. ${isToday ? "Seu QR já está no botão central." : "Eles aparecem no botão central no dia da visita."}`,
+        notify({ cat: "fila", ico: "ticket", c: "var(--green)", go: ["tickets"], title: "Ingressos confirmados", body: `${n} ${n > 1 ? "ingressos" : "ingresso"} para ${when}. Retire o relógio no totem da entrada.` });
+        successSheet("Compra confirmada!", `Pedido ${code} · ${n} ${n > 1 ? "ingressos" : "ingresso"} · ${brl(total)}. ${isToday ? "Seu QR já está no botão central." : "Eles aparecem no botão central no dia da visita."}`,
           `<button class="btn btn-primary btn-block" data-act="openQR">Ver meu ingresso</button><button class="btn btn-ghost btn-block" data-go="planner">Montar meu roteiro</button>`);
       }, 1300);
     },
@@ -1416,6 +1487,7 @@
   const FLOWS = [
     { t: "Primeiro acesso", s: "cadastro", run: () => ACT.resetAll() },
     { t: "Comprar ingresso", s: "3 etapas", run: () => { ensureOnb(); stack = [{ name: "home", p: {} }]; D.buy = null; go("buy"); } },
+    { t: "Compra no site → app", s: "abre o site", run: () => { window.open("../?comprar", "_blank", "noopener"); } },
     { t: "Ingresso e QR rápido", s: "botão central", run: () => { ensureDemo(); tab("home"); openQR(); } },
     { t: "Filas em tempo real", s: "ao vivo", run: () => { ensureDemo(); D.filter = "all"; tab("park", { seg: "list" }); } },
     { t: "Mapa das ilhas", s: "toque nas ilhas", run: () => { ensureDemo(); tab("park", { seg: "map" }); } },
@@ -1461,6 +1533,25 @@
       <div class="list">${list.map(attrRow).join("")}</div>`);
   };
 
+  /* ---------- tela do computador: o aparelho e o painel encolhem para caber ---------- */
+  const desk = matchMedia("(min-width: 861px)");
+  function fitDesktop() {
+    const dev = $(".device"), deck = $(".deck");
+    if (!desk.matches) { dev.style.zoom = ""; deck.style.zoom = ""; deck.style.maxHeight = ""; return; }
+    const H = innerHeight - 48, W = innerWidth - 48;
+    const gap = Math.min(96, Math.max(32, innerWidth * 0.06));
+    const z = Math.max(0.5, Math.min(1, H / 868, (W - gap - 300) / 414));
+    dev.style.zoom = z;
+    deck.style.zoom = 1; deck.style.maxHeight = "none";
+    const k = Math.max(0.72, Math.min(1, H / deck.scrollHeight));
+    deck.style.zoom = k;
+    deck.style.maxHeight = H / k + "px";
+  }
+  addEventListener("resize", fitDesktop);
+  document.fonts && document.fonts.ready.then(fitDesktop);
+
   render("");
+  fitDesktop();
+  importFromURL();
   setInterval(tick, 1000);
 })();

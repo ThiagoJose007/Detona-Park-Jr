@@ -36,11 +36,8 @@ window.APP = (() => {
     { id: "fechamento", t: "18:00", title: "Encerramento", island: "lobby", kind: "Parque", dur: 0 },
   ];
 
-  const TICKETS = [
-    { id: "dia", name: "Dia no parque", price: 149, desc: "Todas as ilhas, relógio incluso e 3 reservas de horário.", reservas: 3 },
-    { id: "meia", name: "Meia-entrada", price: 74.5, desc: "Estudantes, crianças de 3 a 12 anos e idosos.", reservas: 3 },
-    { id: "turbo", name: "Passe Turbo", price: 229, desc: "Tudo do Dia no parque, 6 reservas e entrada expressa na montanha-russa.", reservas: 6, tag: "Mais vendido" },
-  ];
+  // Os mesmos ingressos vendidos no site (js/data.js)
+  const TICKETS = window.PARK.TICKETS;
 
   const REWARDS = [
     { id: "adesivo", name: "Cartela de adesivos pixel", cost: 3, color: "#49d8ff" },

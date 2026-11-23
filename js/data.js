@@ -105,6 +105,13 @@ window.PARK = (() => {
     { q: "Como recebo minhas fotos?", a: "A equipe registra os melhores momentos de cada atração, e as fotos e vídeos ficam prontos logo na saída." },
   ];
 
+  // Tipos de ingresso: usados pela compra no site e pelo app
+  const TICKETS = [
+    { id: "dia", name: "Dia no parque", price: 149, desc: "Todas as ilhas, relógio incluso e 3 reservas de horário.", reservas: 3, perks: ["Todas as 6 ilhas", "Relógio do parque incluso", "3 reservas de horário"] },
+    { id: "meia", name: "Meia-entrada", price: 74.5, desc: "Estudantes, crianças de 3 a 12 anos e idosos.", reservas: 3, perks: ["Mesmos benefícios do Dia no parque", "Documento na entrada", "Crianças de 3 a 12 anos"] },
+    { id: "turbo", name: "Passe Turbo", price: 229, desc: "Tudo do Dia no parque, 6 reservas e entrada expressa na montanha-russa.", reservas: 6, tag: "Mais vendido", perks: ["Tudo do Dia no parque", "6 reservas de horário", "Entrada expressa na montanha-russa"] },
+  ];
+
   const TEAM = [
     "Emilly Vitória Soares Tavares",
     "Maysa Pereira Alves",
@@ -139,9 +146,38 @@ window.PARK = (() => {
     close: '<path d="M6 6l12 12M18 6L6 18"/>',
     arrowUp: '<path d="M12 19V5M6 11l6-6 6 6"/>',
     plus: '<path d="M12 5v14M5 12h14"/>',
+    minus: '<path d="M5 12h14"/>',
+    check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+    copy: '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 00-1-1H5a1 1 0 00-1 1v10a1 1 0 001 1h3"/>',
+    phone: '<rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/>',
+    calendar: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
+    lock: '<rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V8a4 4 0 018 0v2.5"/>',
   };
   const icon = (name, cls = "") =>
     `<svg class="icon ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ""}</svg>`;
 
-  return { ISLANDS, PILLARS, STEPS, FAQ, TEAM, NAV, ICONS, icon };
+  // Pedidos: o site grava, o app importa (mesmo endereço = mesmo armazenamento).
+  // O link/QR leva o pedido junto, para funcionar também em outro aparelho.
+  const ORDERS_KEY = "dp-orders";
+  const ORDERS = {
+    all() { try { return JSON.parse(localStorage.getItem(ORDERS_KEY)) || []; } catch (e) { return []; } },
+    add(o) { try { localStorage.setItem(ORDERS_KEY, JSON.stringify([o, ...ORDERS.all().filter((x) => x.code !== o.code)].slice(0, 20))); } catch (e) { /* sem armazenamento */ } },
+    find(code) { const c = String(code || "").trim().toUpperCase(); return ORDERS.all().find((o) => o.code === c) || null; },
+    // pedido pode ter vários dias: d = lista de datas, cada item guarda o índice do dia
+    encode(o) {
+      const ds = o.dates || [o.date];
+      const s = JSON.stringify({ c: o.code, d: ds, n: o.buyer.name, i: o.items.map((t) => [t.type, t.holder, t.h || 0, Math.max(0, ds.indexOf(t.date || o.date))]) });
+      return btoa(unescape(encodeURIComponent(s))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    },
+    decode(str) {
+      try {
+        const j = JSON.parse(decodeURIComponent(escape(atob(str.replace(/-/g, "+").replace(/_/g, "/")))));
+        const ds = Array.isArray(j.d) ? j.d : [j.d];
+        return { code: j.c, date: ds[0], dates: ds, buyer: { name: j.n, email: "" }, items: j.i.map(([type, holder, h, di], k) => ({ type, holder, h, date: ds[di || 0], code: `${j.c}-${k + 1}` })) };
+      } catch (e) { return null; }
+    },
+    appLink(o, base) { return `${base}app/?pedido=${encodeURIComponent(o.code)}&p=${ORDERS.encode(o)}`; },
+  };
+
+  return { ISLANDS, PILLARS, STEPS, FAQ, TEAM, NAV, TICKETS, ORDERS, ICONS, icon };
 })();
