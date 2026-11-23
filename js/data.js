@@ -12,71 +12,37 @@ window.PARK = (() => {
       id: "lobby", name: "Lobby Fliperama", hook: "Comece jogando", color: "#49d8ff",
       intensity: 1, forWho: "Todas as idades",
       text: "Um salão aberto cheio de máquinas clássicas. Jogue à vontade enquanto o parque prepara a sua entrada.",
-      // Fundo chapado 54,61,74. A elipse é larga para o túnel de neon sair do quadro sem corte.
-      orbit: {
-        folder: "assets/islands/lobby",
-        frames: 120,
-        hero: 0,
-        mask: {
-          centerY: 0.5,
-          radiusX: 0.58,
-          radiusY: 0.58,
-          key0: 0.07,
-          key1: 0.15,
-          core: 0.62,
-          keyColor: [54 / 255, 61 / 255, 74 / 255],
-        },
-      },
+      orbit: { folder: "assets/islands/lobby", frames: 120, hero: 0 },
     },
     {
       id: "felix", name: "Conserta ou Detona", hook: "A escolha é sua", color: "#ff8a1f",
       intensity: 2, forWho: "Crianças e família",
       text: "Derrube blocos com as próprias mãos ou suba a parede de escalada do prédio para consertar tudo.",
-      // Prédio claro: a máscara padrão cobre a base redonda sem comer a fachada.
       orbit: { folder: "assets/islands/conserta-felix", frames: 120, hero: 0 },
     },
     {
       id: "heros", name: "Hero's Duty", hook: "Missão de soldado", color: "#3dff8b",
       intensity: 4, forWho: "Quem ama adrenalina",
       text: "Pilote o simulador de voo e defenda o parque de uma invasão de insetos. Seu controle, sua missão.",
-      // Paredes escuras: a máscara é mais fechada que a da Sugar Rush para o estúdio não comer a sala.
-      orbit: {
-        folder: "assets/islands/heros-duty",
-        frames: 120,
-        hero: 0,
-        mask: { centerY: 0.515, radiusX: 0.34, radiusY: 0.46, key0: 0.06, key1: 0.13, core: 0.8 },
-      },
+      orbit: { folder: "assets/islands/heros-duty", frames: 120, hero: 0 },
     },
     {
       id: "sugar", name: "Sugar Rush", hook: "Corrida doce", color: "#ff4fb0",
       intensity: 4, forWho: "Família e amigos",
       text: "Escolha a fantasia, personalize seu kart e dispute largadas de 8 pilotos numa pista de doces. Mas atenção: algo escapou do jogo…",
-      // Volta 360° pré-renderizada. Outras ilhas: mesma pasta de quadros + este bloco.
       orbit: { folder: "assets/islands/sugar-rush", frames: 120, hero: 0 },
     },
     {
       id: "cola", name: "Montanha-Russa Diet Cola", hook: "O grande final", color: "#ffc93c",
       intensity: 5, forWho: "Os mais corajosos",
       text: "Um percurso escuro e molhado que termina dentro da erupção do vulcão de refrigerante. Game over no melhor sentido.",
-      // Chão espelhado e partículas: elipse mais alta, para a erupção e o reflexo sumirem na borda em vez de serem cortados.
-      orbit: {
-        folder: "assets/islands/diet-cola",
-        frames: 120,
-        hero: 0,
-        mask: { centerY: 0.56, radiusX: 0.44, radiusY: 0.6, key0: 0.04, key1: 0.105, core: 0.5 },
-      },
+      orbit: { folder: "assets/islands/diet-cola", frames: 120, hero: 0 },
     },
     {
       id: "praca", name: "Praça Doce", hook: "Respira e comemora", color: "#ff2e3b",
       intensity: 1, forWho: "Todas as idades",
       text: "Monte seu carrinho de doces, personalize seu capacete e troque as fichas do dia por itens exclusivos.",
-      // O túnel de neon sai do quadro: a elipse é mais larga para o fio apagar na borda.
-      orbit: {
-        folder: "assets/islands/praca",
-        frames: 120,
-        hero: 0,
-        mask: { centerY: 0.52, radiusX: 0.58, radiusY: 0.56, key0: 0.05, key1: 0.12, core: 0.52 },
-      },
+      orbit: { folder: "assets/islands/praca", frames: 120, hero: 0 },
     },
   ];
 

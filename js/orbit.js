@@ -14,10 +14,9 @@
    mouseFrames (quanto o mouse gira, padrão 18),
    span (largura do trecho em "ilhas", padrão 1 = de um
    meio-caminho ao seguinte).
-   Se o estúdio escuro comer paredes escuras do diorama, aperte
-   a máscara na própria ilha: mask: { radiusX, radiusY, core, key0, key1 }.
-   Se o fundo for uma cor chapada (e não o degradê do estúdio), passe
-   mask.keyColor: [r, g, b] de 0 a 1. Sem isso, vale o degradê padrão.
+   Os quadros já vêm sem fundo (webp com transparência): o fundo
+   de estúdio é retirado antes, por um script que acha o degradê
+   da borda e apaga tudo que é parecido com ele e encosta na borda.
    ========================================================= */
 window.ORBIT = (() => {
   const DEFAULTS = {
@@ -31,18 +30,6 @@ window.ORBIT = (() => {
     planeWidth: 7.5,
     planeY: 1.02,
     planeZ: 0.35,
-  };
-
-  // Máscara: o miolo fica sólido; a borda some onde a cor é o
-  // estúdio escuro, para não aparecer um retângulo.
-  const MASK = {
-    centerX: 0.5,
-    centerY: 0.49, // a partir do topo da foto
-    radiusX: 0.4,
-    radiusY: 0.47,
-    key0: 0.07,
-    key1: 0.16,
-    core: 0.7,
   };
 
   const coarse = window.matchMedia("(pointer: coarse)").matches;
@@ -76,7 +63,6 @@ window.ORBIT = (() => {
 
   function mount(THREE, { parent, model, base, index, config }) {
     const cfg = { ...DEFAULTS, ...config };
-    const mask = { ...MASK, ...(config.mask || {}) };
     const count = cfg.frames | 0;
     const hero = mod(cfg.hero | 0, count);
 
@@ -87,7 +73,8 @@ window.ORBIT = (() => {
     let failedCount = 0;
     const pending = new Set();
 
-    const url = (i) => `${cfg.folder}/${String(i).padStart(cfg.pad, "0")}.${cfg.ext}`;
+    // ?v=2: quadros sem fundo (evita o navegador usar a versão antiga em cache)
+    const url = (i) => `${cfg.folder}/${String(i).padStart(cfg.pad, "0")}.${cfg.ext}?v=2`;
     for (const i of spiral(hero, count)) {
       const img = new Image();
       img.decoding = "async";
@@ -164,9 +151,7 @@ window.ORBIT = (() => {
     const canvas = document.createElement("canvas");
     canvas.width = TEX_W;
     canvas.height = TEX_H;
-    const ctx = canvas.getContext("2d", { alpha: false, desynchronized: true });
-    ctx.fillStyle = "#07060b";
-    ctx.fillRect(0, 0, TEX_W, TEX_H);
+    const ctx = canvas.getContext("2d", { alpha: true });
 
     const texture = new THREE.CanvasTexture(canvas);
     texture.colorSpace = THREE.LinearSRGBColorSpace;
@@ -174,19 +159,9 @@ window.ORBIT = (() => {
     texture.magFilter = THREE.LinearFilter;
     texture.generateMipmaps = false;
 
-    const keyColor = Array.isArray(mask.keyColor) ? mask.keyColor : null;
     const uniforms = {
       map: { value: texture },
       uOpacity: { value: 0 },
-      uMask: { value: new THREE.Vector4(mask.centerX, mask.centerY, mask.radiusX, mask.radiusY) },
-      uKey: { value: new THREE.Vector3(mask.key0, mask.key1, mask.core) },
-      // a = 1 usa a cor chapada; a = 0 mantém o degradê do estúdio.
-      uKeyColor: { value: new THREE.Vector4(
-        keyColor ? keyColor[0] : 0,
-        keyColor ? keyColor[1] : 0,
-        keyColor ? keyColor[2] : 0,
-        keyColor ? 1 : 0,
-      ) },
     };
 
     const material = new THREE.ShaderMaterial({
@@ -206,27 +181,11 @@ window.ORBIT = (() => {
       fragmentShader: `
         uniform sampler2D map;
         uniform float uOpacity;
-        uniform vec4 uMask;
-        uniform vec3 uKey;
-        uniform vec4 uKeyColor;
         varying vec2 vUv;
-
-        float fade(float a, float b, float x) {
-          float t = clamp((x - a) / (b - a), 0.0, 1.0);
-          return t * t * (3.0 - 2.0 * t);
-        }
 
         void main() {
           vec4 tex = texture2D(map, vUv);
-          vec2 p = vec2(vUv.x, 1.0 - vUv.y);
-          float e = length((p - uMask.xy) / uMask.zw);
-          vec3 grad = mix(vec3(0.1255, 0.1176, 0.1686), vec3(0.0471, 0.0627, 0.1176), vUv.y);
-          vec3 bg = mix(grad, uKeyColor.rgb, uKeyColor.a);
-          float dist = distance(tex.rgb, bg);
-          float bgA = 1.0 - fade(uKey.x, uKey.y, dist);
-          float edge = fade(uKey.z, 0.92, e);
-          float outer = 1.0 - fade(1.02, 1.16, e);
-          float alpha = (1.0 - bgA * max(edge, fade(0.96, 1.05, e))) * outer * uOpacity;
+          float alpha = tex.a * uOpacity;
           if (alpha < 0.004) discard;
           gl_FragColor = vec4(tex.rgb, alpha);
         }
@@ -294,6 +253,7 @@ window.ORBIT = (() => {
       const key = useBlend ? `${i0}-${i1}-${q}` : `s${shown}`;
       if (key === lastKey) return true;
       ctx.globalAlpha = 1;
+      ctx.clearRect(0, 0, TEX_W, TEX_H);
       if (useBlend) {
         ctx.drawImage(images[i0], 0, 0, TEX_W, TEX_H);
         ctx.globalAlpha = q / 5;
