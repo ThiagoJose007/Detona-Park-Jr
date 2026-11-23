@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Detona Park App</title>
+  <meta name="description" content="Protótipo do app do Detona Park: ingressos, carteira, filas em tempo real, reservas, roteiro e integração com o relógio do parque." />
+  <meta name="theme-color" content="#07060b" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=Pixelify+Sans:wght@600;700&family=Silkscreen&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/app.css?v=5" />
+</head>
+<body>
+
+  <!-- Painel de apresentação (só aparece no computador) -->
+  <aside class="deck" aria-label="Sobre o protótipo">
+    <a class="deck-logo" href="../"><span class="logo-mark"></span>Detona Park</a>
+    <p class="eyebrow">Protótipo do app</p>
+    <h1 class="deck-title">O site convida.<br /><span class="muted">O app acompanha você no parque.</span></h1>
+    <div class="deck-compare">
+      <div><p class="deck-k">Site</p><p>Porta de interesse: apresenta o parque, as ilhas e a experiência.</p></div>
+      <div><p class="deck-k">App</p><p>Seu dia na mão: ingressos, carteira, filas, reservas, roteiro, avisos e o relógio.</p></div>
+    </div>
+    <p class="deck-k deck-k-sp">Fluxos para testar</p>
+    <ol class="deck-flows" id="deckFlows"></ol>
+    <div class="deck-demo">
+      <p class="deck-k">Relógio do parque (demonstração)</p>
+      <div class="deck-clock"><b data-live="clock">10:20</b><span data-live="speed">20× mais rápido</span></div>
+      <div class="deck-btns">
+        <button type="button" class="chip" data-act="speed">Velocidade</button>
+        <button type="button" class="chip" data-act="skip:30">+30 min</button>
+        <button type="button" class="chip" data-act="jump:1005">16:45</button>
+        <button type="button" class="chip" data-act="jump:1080">18:00</button>
+        <button type="button" class="chip" data-act="resetAll">Reiniciar</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Aparelho -->
+  <div class="device">
+    <div class="app" id="app">
+      <div class="statusbar" aria-hidden="true">
+        <b data-live="clock">10:20</b>
+        <span class="sb-right"><i class="sb-watch" id="sbWatch"></i><i class="sb-bat"></i></span>
+      </div>
+      <main class="view" id="view"></main>
+      <nav class="tabbar" id="tabbar" aria-label="Navegação principal"></nav>
+      <div class="sheet" id="sheet" hidden>
+        <div class="sheet-bg" data-act="closeSheet"></div>
+        <div class="sheet-panel" role="dialog" aria-modal="true"><div class="sheet-grab"></div><div id="sheetBody"></div></div>
+      </div>
+      <div class="banner" id="banner" role="status" aria-live="polite" hidden></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+  <script src="../js/data.js"></script>
+  <script src="js/app-data.js?v=2"></script>
+  <script src="js/app.js?v=5"></script>
+</body>
+</html>
